@@ -6,13 +6,64 @@
 
 - 🎥 支持多种视频格式（MP4、AVI、MOV、MKV等）
 - 👤 使用YuNet深度学习模型进行高精度人脸检测
+- 🔄 **侧脸检测优化**：多尺度检测技术，显著提升侧脸和困难角度的检测效果
+- 🎯 **延续打码策略**：智能跟踪算法，在检测失败时自动延续打码，避免闪烁
 - 📊 提供详细的检测统计信息
 - 🖥️ 支持实时预览功能
 - 💾 可选择保存带标注的输出视频
 - 🔒 支持椭圆形人脸马赛克处理（隐私保护，更自然的遮挡效果）
 - 📷 支持网络摄像头实时检测
 - 🛠️ 简单易用的命令行界面
-- 🧠 DeepFace集成：可选的高级人脸分析功能（年龄、性别、情绪、种族识别）
+- 🧠 **DeepFace集成**：多后端支持（MTCNN、RetinaFace等），可选的高级人脸分析功能
+- 🔀 **混合检测器**：结合YuNet和DeepFace的优势，提供最佳检测效果
+
+## 技术特性
+
+### 侧脸检测优化
+本项目采用多尺度检测技术，显著提升侧脸和困难角度的人脸检测效果：
+- **多尺度检测**：使用不同尺度的检测窗口，提高小脸和远距离人脸的检测率
+- **DeepFace集成**：支持MTCNN、RetinaFace等先进检测后端，专门优化侧脸检测
+- **混合检测器**：结合YuNet的速度优势和DeepFace的精度优势
+- **角度适应**：对各种头部姿态（正脸、侧脸、仰头、低头）都有良好的检测效果
+
+### 延续打码策略
+智能跟踪算法确保打码的连续性和稳定性：
+- **智能延续**：当检测失败时，使用最后检测到的人脸位置继续打码
+- **可配置帧数**：通过 `--continuation-frames` 参数自定义延续帧数（默认5帧）
+- **历史信息利用**：分析最近3帧的检测历史，提供更准确的延续位置
+- **进度提示**：控制台显示延续打码的详细信息和统计数据
+
+### 椭圆形马赛克处理
+本项目采用椭圆形马赛克技术，相比传统的矩形马赛克，提供更自然的人脸遮挡效果：
+- **自适应椭圆形状**：根据检测到的人脸区域自动调整椭圆大小和形状
+- **可调节马赛克粒度**：通过 `--mosaic-size` 参数控制马赛克块大小（默认15像素）
+- **边缘平滑处理**：椭圆边缘采用渐变过渡，避免生硬的边界效果
+- **隐私保护优化**：椭圆形状更贴合人脸轮廓，在保护隐私的同时保持画面美观
+
+### 抗抖动技术
+为了解决视频中人脸检测可能出现的抖动问题，本项目实现了智能抗抖动算法：
+- **位置平滑**：对连续帧中的人脸位置进行平滑处理
+- **尺寸稳定**：避免马赛克区域大小的突然变化
+- **自动启用**：使用马赛克功能时自动启用抗抖动
+- **实时优化**：在保持检测精度的同时提供稳定的视觉效果
+
+## 性能优化建议
+
+### 检测器选择策略
+- **实时预览**：使用YuNet检测器（`--detector yunet`）
+- **侧脸较多**：使用DeepFace + MTCNN（`--detector deepface --deepface-backend mtcnn`）
+- **最佳效果**：使用混合检测器（`--detector hybrid --deepface-backend retinaface`）
+- **资源受限**：使用YuNet + 较少延续帧数（`--continuation-frames 3`）
+
+### 延续打码参数调优
+- **快速运动场景**：增加延续帧数（`--continuation-frames 10-15`）
+- **静态场景**：使用默认值（`--continuation-frames 5`）
+- **实时处理**：减少延续帧数（`--continuation-frames 3`）
+
+### 马赛克效果优化
+- **高清视频**：使用较小马赛克块（`--mosaic-size 8-12`）
+- **标清视频**：使用默认值（`--mosaic-size 15`）
+- **快速处理**：使用较大马赛克块（`--mosaic-size 20-25`）
 
 ## 安装要求
 
@@ -73,10 +124,13 @@ python main.py input_video.mp4 --output result_video.mp4 --preview
 - `--mosaic, -m`: 对检测到的人脸应用椭圆形马赛克效果（可选）
 - `--mosaic-size`: 马赛克块大小，值越小马赛克越细腻（默认：15）
 - `--model`: 自定义YuNet模型文件路径（可选）
+- `--detector`: 选择检测器类型（yunet、deepface、hybrid）
+- `--deepface-backend`: DeepFace检测后端（opencv、ssd、dlib、mtcnn、retinaface）
+- `--continuation-frames`: 无人脸检测时延续打码的帧数（默认：5帧）
 
 #### 使用示例
 ```bash
-# 处理名为 sample.mp4 的视频文件
+# 基础检测（已优化侧脸检测，延续打码5帧）
 python main.py sample.mp4 --output detected_faces.mp4 --preview
 
 # 对人脸应用椭圆形马赛克效果
@@ -85,10 +139,117 @@ python main.py sample.mp4 --mosaic --output privacy_protected.mp4
 # 使用细腻椭圆形马赛克效果并预览（自动启用抗抖动）
 python main.py sample.mp4 --mosaic --mosaic-size 8 --preview
 
-#### 测试抗抖动功能效果
-```bash
-python main.py input.mp4 --mosaic --output anti_jitter_test.mp4
+# 使用DeepFace检测器进行侧脸检测（推荐MTCNN后端）
+python main.py sample.mp4 --detector deepface --deepface-backend mtcnn --mosaic
+
+# 使用混合检测器（YuNet + DeepFace）获得最佳效果
+python main.py sample.mp4 --detector hybrid --deepface-backend retinaface --mosaic
+
+# 自定义延续打码策略（延续10帧）
+python main.py sample.mp4 --continuation-frames 10 --mosaic --output output.mp4
 ```
+
+## 检测器选择指南
+
+本项目提供三种检测器类型，适用于不同的使用场景：
+
+### YuNet 检测器（默认）
+- **优势**：速度快，资源占用低，适合实时处理
+- **适用场景**：正脸检测，实时预览，资源受限环境
+- **使用方法**：`--detector yunet`（默认，可省略）
+
+### DeepFace 检测器
+- **优势**：侧脸检测效果优秀，支持多种后端
+- **适用场景**：侧脸较多的视频，高精度要求
+- **推荐后端**：
+  - `mtcnn`：侧脸检测效果最佳
+  - `retinaface`：综合性能优秀
+  - `opencv`：速度最快（默认）
+- **使用方法**：`--detector deepface --deepface-backend mtcnn`
+
+### 混合检测器（推荐）
+- **优势**：结合两种检测器的优势，检测效果最佳
+- **适用场景**：复杂场景，多角度人脸，高质量要求
+- **工作原理**：YuNet快速检测 + DeepFace补充检测
+- **使用方法**：`--detector hybrid --deepface-backend retinaface`
+
+## DeepFace 集成功能
+
+本项目集成了 DeepFace 库，提供高级人脸分析和检测功能。
+
+### 检测后端支持
+- **OpenCV**：速度最快，基础检测效果
+- **SSD**：平衡速度和精度
+- **Dlib**：传统机器学习方法，稳定可靠
+- **MTCNN**：多任务CNN，侧脸检测效果优秀
+- **RetinaFace**：最新技术，综合性能最佳
+
+### 使用方法
+```bash
+# 使用MTCNN后端进行侧脸检测
+python main.py sample.mp4 --detector deepface --deepface-backend mtcnn --mosaic
+
+# 使用混合检测器获得最佳效果
+python main.py sample.mp4 --detector hybrid --deepface-backend retinaface --mosaic
+
+# 自定义延续打码策略
+python main.py sample.mp4 --continuation-frames 10 --mosaic
+```
+
+### 注意事项
+- DeepFace 检测会增加处理时间，但检测效果更好
+- 首次使用时会自动下载必要的模型文件
+- 混合检测器提供最佳的检测覆盖率和稳定性
+
+## 故障排除
+
+### 常见问题
+
+#### 1. 侧脸检测效果不佳
+**解决方案**：
+```bash
+# 使用MTCNN后端，专门优化侧脸检测
+python main.py sample.mp4 --detector deepface --deepface-backend mtcnn --mosaic
+
+# 或使用混合检测器获得最佳效果
+python main.py sample.mp4 --detector hybrid --deepface-backend retinaface --mosaic
+```
+
+#### 2. 打码出现闪烁或不连续
+**解决方案**：
+```bash
+# 增加延续打码帧数
+python main.py sample.mp4 --continuation-frames 10 --mosaic
+
+# 对于快速运动场景，可以进一步增加
+python main.py sample.mp4 --continuation-frames 15 --mosaic
+```
+
+#### 3. 处理速度过慢
+**解决方案**：
+```bash
+# 使用默认YuNet检测器（最快）
+python main.py sample.mp4 --detector yunet --mosaic
+
+# 减少延续帧数
+python main.py sample.mp4 --continuation-frames 3 --mosaic
+
+# 增大马赛克块大小
+python main.py sample.mp4 --mosaic-size 20 --mosaic
+```
+
+#### 4. 小脸或远距离人脸检测不到
+**解决方案**：
+```bash
+# 使用混合检测器，提高检测覆盖率
+python main.py sample.mp4 --detector hybrid --deepface-backend retinaface --mosaic
+```
+
+### 控制台信息说明
+- `延续打码`: 表示正在使用历史位置进行打码
+- `检测到 X 个人脸`: 当前帧的检测结果
+- `使用历史信息延续打码`: 分析历史帧进行智能延续
+- `清空人脸历史`: 超过延续帧数限制，重置跟踪状态
 
 ### DeepFace高级分析功能
 ```bash
@@ -155,12 +316,148 @@ python example.py
 
 ```
 video-face-detection/
-├── main.py              # 主程序入口
-├── face_detector.py     # 人脸检测核心模块
-├── example.py           # 示例代码
-├── requirements.txt     # 项目依赖
-└── README.md           # 使用说明
+├── main.py                 # 主程序入口
+├── face_detector.py        # YuNet人脸检测核心模块
+├── deepface_detector.py    # DeepFace集成模块
+├── models/                 # 模型文件目录
+│   └── face_detection_yunet_2023mar.onnx
+├── requirements.txt        # 依赖包列表
+├── CONTINUATION_FRAMES_DEBUG.md  # 延续打码功能调试文档
+└── README.md              # 项目说明文档
 ```
+
+## 技术实现
+
+### 核心算法
+- **YuNet模型**：基于深度学习的人脸检测算法，具有高精度和实时性能
+- **DeepFace集成**：支持多种检测后端（MTCNN、RetinaFace等），专门优化侧脸检测
+- **混合检测器**：结合YuNet和DeepFace的优势，提供最佳检测效果
+- **延续打码策略**：智能跟踪算法，在检测失败时自动延续打码
+- **椭圆形马赛克**：使用椭圆形状替代传统矩形，提供更自然的遮挡效果
+- **抗抖动算法**：通过位置平滑和尺寸稳定化技术减少检测抖动
+
+### 性能优化
+- 使用OpenCV的硬件加速功能
+- 优化的视频读取和写入流程
+- 内存使用优化，支持大文件处理
+- 智能检测器选择策略
+- 可配置的延续打码参数
+
+## 依赖库
+
+主要依赖包：
+- `opencv-python`: 计算机视觉和图像处理
+- `numpy`: 数值计算
+- `deepface`: 高级人脸检测和分析
+- `tensorflow`: DeepFace后端支持
+- `mtcnn`: MTCNN检测后端
+- `retina-face`: RetinaFace检测后端
+
+完整依赖列表请参考 `requirements.txt` 文件。
+
+## 模型文件
+
+### YuNet模型
+- **模型文件**: `face_detection_yunet_2023mar.onnx`
+- **模型大小**: 约1.84MB
+- **检测精度**: 在WIDER FACE数据集上达到业界先进水平
+- **推理速度**: 支持实时检测（30+ FPS）
+- **适用场景**: 正脸检测，实时处理
+
+### DeepFace模型
+- **MTCNN**: 多任务CNN，侧脸检测效果优秀
+- **RetinaFace**: 最新技术，综合性能最佳
+- **OpenCV**: 速度最快，基础检测效果
+- **自动下载**: 首次使用时自动下载到相应目录
+
+## 输出格式
+
+### 控制台输出
+程序运行时会显示详细的处理信息：
+```
+正在处理视频: sample.mp4
+视频信息: 1920x1080, 30.0 FPS, 总帧数: 900
+使用检测器: hybrid (YuNet + DeepFace-RetinaFace)
+延续打码策略: 启用 (5帧)
+正在处理帧 1/900...
+检测到 2 个人脸
+正在处理帧 2/900...
+检测到 1 个人脸
+正在处理帧 3/900...
+延续打码: 使用历史位置 (1/5)
+...
+处理完成！
+总处理时间: 45.2秒
+平均FPS: 19.9
+检测统计:
+- 总帧数: 900
+- 检测到人脸的帧数: 856 (95.1%)
+- 延续打码帧数: 44 (4.9%)
+- 平均每帧人脸数: 1.3
+```
+
+### 视频输出
+- 支持与输入相同的分辨率和帧率
+- 保持原始视频质量
+- 可选择是否保存处理后的视频文件
+- 椭圆形马赛克效果更自然
+
+## 使用场景
+
+### 隐私保护
+- 会议录像中的人脸匿名化
+- 公共场所监控视频的隐私处理
+- 社交媒体内容的隐私保护
+- 侧脸和多角度人脸的有效遮挡
+
+### 内容审核
+- 自动识别和标记视频中的人脸
+- 批量处理大量视频文件
+- 实时监控和预警系统
+- 复杂场景下的稳定检测
+
+### 研究和开发
+- 人脸检测算法的性能评估
+- 计算机视觉项目的基础工具
+- 教学和演示用途
+- 多检测器性能对比研究
+
+## 贡献
+
+欢迎提交 Issue 和 Pull Request 来改进这个项目！
+
+## 更新日志
+
+### v3.0.0 (2024-01)
+- 🔄 **新增侧脸检测优化**：集成DeepFace多后端支持
+- 🎯 **新增延续打码策略**：智能跟踪算法，避免打码闪烁
+- 🔀 **新增混合检测器**：结合YuNet和DeepFace优势
+- 📊 **优化控制台输出**：详细的检测统计和进度信息
+- 🛠️ **新增参数选项**：检测器选择、后端配置、延续帧数设置
+
+### v2.0.0 (2024-01)
+- 新增DeepFace集成功能
+- 支持高级人脸分析（年龄、性别、情绪、种族）
+- 优化检测算法性能
+- 改进用户界面和错误处理
+
+### v1.2.0 (2023-12)
+- 新增椭圆形马赛克功能
+- 实现抗抖动算法
+- 支持网络摄像头实时检测
+- 优化内存使用和处理速度
+
+### v1.1.0 (2023-11)
+- 新增实时预览功能
+- 支持多种视频格式
+- 改进检测精度和稳定性
+- 添加详细的统计信息
+
+### v1.0.0 (2023-10)
+- 初始版本发布
+- 基础人脸检测和标注功能
+- 支持视频文件处理
+- 命令行界面
 
 ## 核心类说明
 
@@ -388,28 +685,29 @@ print(f"主要情绪: {result['dominant_emotions']}")
 
 ## 常见问题
 
-### Q: 检测效果不理想怎么办？
-A: 可以尝试调整检测参数，或者使用更高质量的视频文件。光照条件和人脸角度会影响检测效果。
+## 网络摄像头支持
 
-### Q: 处理大视频文件很慢？
-A: 这是正常现象。可以考虑：
-- 降低视频分辨率
-- 调整检测参数提高速度
-- 使用更快的硬件
+本项目支持使用网络摄像头进行实时人脸检测：
 
-### Q: 如何使用自定义的人脸检测模型？
-A: 可以通过 `--model` 参数指定自定义的YuNet模型文件。项目默认使用 `models/face_detection_yunet_2023mar_int8bq.onnx` 模型。
+```bash
+# 使用默认摄像头（通常是摄像头ID 0）
+python main.py 0 --preview
 
-### Q: 为什么输出视频文件比原始文件大很多？
-A: 这主要由以下几个因素造成：
-- **视频编码器差异**：程序会自动选择最佳的编码器（H.264 > avc1 > XVID > mp4v），不同编码器的压缩效率不同
-- **重新编码过程**：视频处理需要解码后重新编码，可能会影响压缩效果
-- **质量设置**：为保证处理后的视频质量，使用了较高的编码质量设置
-- **帧处理**：每一帧都经过了人脸检测和图像处理，可能会影响压缩效率
+# 使用特定摄像头ID
+python main.py 1 --preview
 
-**优化建议**：
-- 程序已自动使用H.264编码器来减小文件大小
-- 如需进一步压缩，可以使用专业的视频压缩工具对输出文件进行二次压缩
+# 实时马赛克处理（推荐使用YuNet以获得更好的实时性能）
+python main.py 0 --detector yunet --mosaic --preview
+
+# 实时侧脸检测（性能要求较高）
+python main.py 0 --detector hybrid --deepface-backend mtcnn --mosaic --preview
+```
+
+**注意**：
+- 摄像头ID通常从0开始
+- 使用摄像头时建议启用预览功能
+- 实时处理推荐使用YuNet检测器以获得更好的性能
+- 按 'q' 键退出实时检测
 
 ## 许可证
 
