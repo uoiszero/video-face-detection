@@ -1,0 +1,12 @@
+# 视频人脸检测项目依赖
+
+# 核心依赖（必需）
+opencv-python==4.8.1.78
+numpy==1.24.3
+argparse
+
+# 可选依赖（高级功能）
+# 取消注释以下行来启用DeepFace人脸分析功能
+# deepface>=0.0.79
+# tensorflow>=2.12.0
+# tf-keras>=2.12.0
