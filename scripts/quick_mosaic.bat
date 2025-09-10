@@ -92,12 +92,12 @@ goto :eof
 REM 检查依赖文件
 set "missing_files="
 
-if not exist "main.py" (
-    set "missing_files=!missing_files! main.py"
+if not exist "..\main.py" (
+    set "missing_files=!missing_files! ..\main.py"
 )
 
-if not exist "models\face_detection_yunet_2023mar.onnx" (
-    set "missing_files=!missing_files! models\face_detection_yunet_2023mar.onnx"
+if not exist "..\models\face_detection_yunet_2023mar.onnx" (
+    set "missing_files=!missing_files! ..\models\face_detection_yunet_2023mar.onnx"
 )
 
 if not "!missing_files!"=="" (
@@ -157,7 +157,9 @@ echo.
 echo ==========================================================
 
 REM 构建并执行命令
-python main.py "%input_file%" --detector hybrid --deepface-backend retinaface --continuation-frames 15 --mosaic --output "%output_file%"
+cd ..
+python main.py "%input_file%" --detector hybrid --deepface-backend retinaface --continuation-frames 15 --mosaic --output "scripts\%output_file%"
+cd scripts
 
 if errorlevel 1 (
     echo ==========================================================

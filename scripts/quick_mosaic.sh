@@ -57,8 +57,8 @@ check_dependencies() {
     local missing_files=()
     
     # 检查必要文件
-    if [[ ! -f "main.py" ]]; then
-        missing_files+=("main.py")
+    if [[ ! -f "../main.py" ]]; then
+        missing_files+=("../main.py")
     fi
     
     if [[ ! -f "models/face_detection_yunet_2023mar.onnx" ]]; then
@@ -116,7 +116,7 @@ run_mosaic() {
     
     # 构建命令
     local cmd=(
-        "python" "main.py"
+        "python" "../main.py"
         "$input_file"
         "--detector" "hybrid"
         "--deepface-backend" "retinaface"

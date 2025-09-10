@@ -13,10 +13,10 @@
 python3 install_dependencies.py
 
 # 方式二：Shell脚本（macOS/Linux）
-chmod +x install.sh && ./install.sh
+chmod +x scripts/install.sh && ./scripts/install.sh
 
 # 方式三：批处理脚本（Windows）
-install.bat
+scripts\install.bat
 ```
 
 ### 2. 准备视频文件
@@ -33,10 +33,10 @@ install.bat
 python quick_mosaic.py your_video.mp4
 
 # Shell版本（macOS/Linux）
-./quick_mosaic.sh your_video.mp4
+./scripts/quick_mosaic.sh your_video.mp4
 
 # Windows批处理版本
-quick_mosaic.bat your_video.mp4
+scripts\quick_mosaic.bat your_video.mp4
 ```
 
 ### 使用示例

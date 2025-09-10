@@ -92,11 +92,11 @@ cd video-face-detection
 python3 install_dependencies.py
 
 # 方式二：Shell脚本（macOS/Linux）
-chmod +x install.sh
-./install.sh
+chmod +x scripts/install.sh
+./scripts/install.sh
 
 # 方式三：批处理脚本（Windows）
-install.bat
+scripts\install.bat
 ```
 
 **安装脚本功能：**
@@ -134,11 +134,11 @@ cd ..
 python quick_mosaic.py input_video.mp4
 
 # Shell版本（macOS/Linux）
-chmod +x quick_mosaic.sh
-./quick_mosaic.sh input_video.mp4
+chmod +x scripts/quick_mosaic.sh
+./scripts/quick_mosaic.sh input_video.mp4
 
 # 批处理版本（Windows）
-quick_mosaic.bat input_video.mp4
+scripts\quick_mosaic.bat input_video.mp4
 ```
 
 **一键打码特性：**
@@ -305,7 +305,7 @@ python main.py sample.mp4 --detector hybrid --deepface-backend retinaface --mosa
 ### DeepFace高级分析功能
 ```bash
 # 安装DeepFace（首次使用）
-./install_deepface.sh
+./scripts/install_deepface.sh
 
 # 运行DeepFace分析演示
 python demo_deepface_analysis.py
@@ -371,8 +371,9 @@ video-face-detection/
 ├── face_detector.py           # YuNet人脸检测核心模块
 ├── deepface_detector.py       # DeepFace集成模块
 ├── quick_mosaic.py            # 一键打码脚本（Python）
-├── quick_mosaic.sh            # 一键打码脚本（Shell）
-├── quick_mosaic.bat           # 一键打码脚本（Windows）
+├── scripts/                   # 脚本文件目录
+│   ├── quick_mosaic.sh        # 一键打码脚本（Shell）
+│   └── quick_mosaic.bat       # 一键打码脚本（Windows）
 ├── models/                    # 模型文件目录
 │   └── face_detection_yunet_2023mar.onnx
 ├── requirements.txt           # 依赖包列表

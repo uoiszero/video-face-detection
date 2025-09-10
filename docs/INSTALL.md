@@ -21,13 +21,13 @@ python3 install_dependencies.py
 
 ```bash
 # 给脚本添加执行权限
-chmod +x install.sh
+chmod +x scripts/install.sh
 
 # 运行安装脚本
-./install.sh
+./scripts/install.sh
 
 # 或者在虚拟环境中安装
-./install.sh --venv
+./scripts/install.sh --venv
 ```
 
 **特点：**
@@ -40,7 +40,7 @@ chmod +x install.sh
 
 ```cmd
 # 双击运行或在命令提示符中执行
-install.bat
+scripts\install.bat
 ```
 
 **特点：**
@@ -75,7 +75,7 @@ install.bat
 
 ```bash
 # 使用Shell脚本创建虚拟环境
-./install.sh --venv
+./scripts/install.sh --venv
 
 # 手动创建虚拟环境
 python3 -m venv venv
@@ -150,8 +150,8 @@ export https_proxy=http://your-proxy:port
 
 **解决方案**：
 ```bash
-chmod +x install.sh
-./install.sh
+chmod +x scripts/install.sh
+./scripts/install.sh
 ```
 
 ### 4. pip安装失败

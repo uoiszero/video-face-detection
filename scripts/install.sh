@@ -133,15 +133,15 @@ install_python_deps() {
 # 创建模型目录
 create_models_dir() {
     print_info "创建模型目录..."
-    mkdir -p models
-    print_success "模型目录已创建: $(pwd)/models"
+    mkdir -p ../models
+    print_success "模型目录已创建: $(pwd)/../models"
 }
 
 # 下载YuNet模型
 download_yunet_models() {
     print_info "下载YuNet模型文件..."
     
-    cd models
+    cd ../models
     
     # YuNet模型URL和文件名
     declare -A MODELS=(
@@ -171,7 +171,7 @@ download_yunet_models() {
         fi
     done
     
-    cd ..
+    cd ../scripts
 }
 
 # 验证安装
@@ -203,8 +203,8 @@ for module, name in test_packages:
 # 检查模型文件
 import os
 model_files = [
-    'models/face_detection_yunet_2023mar.onnx',
-    'models/face_detection_yunet_2023mar_int8.onnx'
+    '../models/face_detection_yunet_2023mar.onnx',
+    '../models/face_detection_yunet_2023mar_int8.onnx'
 ]
 
 model_count = 0
@@ -242,17 +242,17 @@ print_usage_guide() {
     echo -e "${GREEN}🚀 安装完成! 使用指南:${NC}"
     echo -e "${BLUE}==========================================================${NC}"
     echo -e "\n📖 基础使用:"
-    echo -e "   python main.py sample.mp4 --mosaic --preview"
+    echo -e "   python ../main.py sample.mp4 --mosaic --preview"
     echo -e "\n🔄 侧脸检测优化:"
-    echo -e "   python main.py sample.mp4 --detector deepface --deepface-backend mtcnn --mosaic"
+    echo -e "   python ../main.py sample.mp4 --detector deepface --deepface-backend mtcnn --mosaic"
     echo -e "\n🔀 混合检测器 (推荐):"
-    echo -e "   python main.py sample.mp4 --detector hybrid --deepface-backend retinaface --mosaic"
+    echo -e "   python ../main.py sample.mp4 --detector hybrid --deepface-backend retinaface --mosaic"
     echo -e "\n🎯 自定义延续打码:"
-    echo -e "   python main.py sample.mp4 --continuation-frames 10 --mosaic"
+    echo -e "   python ../main.py sample.mp4 --continuation-frames 10 --mosaic"
     echo -e "\n📷 实时摄像头检测:"
-    echo -e "   python main.py 0 --detector yunet --mosaic --preview"
+    echo -e "   python ../main.py 0 --detector yunet --mosaic --preview"
     echo -e "\n📚 更多帮助:"
-    echo -e "   python main.py --help"
+    echo -e "   python ../main.py --help"
     echo -e "   查看 README.md 获取详细文档"
     echo -e "${BLUE}==========================================================${NC}"
 }

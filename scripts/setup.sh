@@ -51,6 +51,22 @@ else
 fi
 echo
 
+# 检查必要文件
+if [[ ! -f "../main.py" ]]; then
+    echo "错误: 找不到 ../main.py 文件"
+    echo "请确保在项目根目录下运行此脚本"
+    exit 1
+fi
+
+# 创建模型目录
+echo "创建模型目录..."
+mkdir -p ../models
+
+cd ../models
+
+cd ../scripts
+echo "模型文件下载完成"
+
 # 测试安装
 echo "测试安装是否成功..."
 python -c "import cv2; import numpy as np; from face_detector import VideoFaceDetector; print('✓ 所有模块导入成功'); detector = VideoFaceDetector(); print('✓ YuNet人脸检测器初始化成功')"

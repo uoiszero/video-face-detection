@@ -66,6 +66,7 @@ echo ""
 
 # 测试安装
 echo "测试DeepFace安装..."
+cd ..
 python3 -c "
 try:
     import deepface
@@ -86,6 +87,7 @@ except ImportError as e:
 print('\n所有依赖安装成功！')
 print('现在可以使用DeepFace人脸分析功能了')
 "
+cd scripts
 
 echo ""
 echo "安装说明:"
