@@ -68,32 +68,60 @@
 ## 安装要求
 
 ### 系统要求
-- Python 3.7+
+- Python 3.8+
+- OpenCV 4.8+
+- NumPy 1.21+
+- DeepFace 0.0.79+
+- TensorFlow 2.12+
+- MTCNN 0.1.1+
+- RetinaFace 0.0.13+
 - macOS / Linux / Windows
 
-### 依赖库
-- OpenCV (opencv-python)
-- NumPy
+## 🚀 快速安装
 
-## 安装步骤
+### 一键安装脚本（推荐）
 
-1. **克隆或下载项目**
-   ```bash
-   cd /path/to/your/projects
-   # 如果是从git克隆
-   git clone <repository-url>
-   cd video-face-detection
-   ```
+本项目提供了多种自动安装脚本，可以一次性安装所有依赖：
 
-2. **安装依赖**
-   ```bash
-   pip install -r requirements.txt
-   ```
+```bash
+# 克隆项目
+git clone <repository-url>
+cd video-face-detection
 
-   或者手动安装：
-   ```bash
-   pip install opencv-python numpy
-   ```
+# 方式一：Python安装脚本（跨平台推荐）
+python3 install_dependencies.py
+
+# 方式二：Shell脚本（macOS/Linux）
+chmod +x install.sh
+./install.sh
+
+# 方式三：批处理脚本（Windows）
+install.bat
+```
+
+**安装脚本功能：**
+- ✅ 自动检测Python环境
+- ✅ 安装所有必需的Python包
+- ✅ 下载YuNet模型文件
+- ✅ 验证安装结果
+- ✅ 提供详细的安装日志
+
+### 手动安装
+
+如果自动安装脚本失败，可以手动安装：
+
+```bash
+# 1. 安装Python依赖
+pip install -r requirements.txt
+
+# 2. 创建模型目录并下载模型文件
+mkdir -p models
+cd models
+wget https://github.com/opencv/opencv_zoo/raw/master/models/face_detection_yunet/face_detection_yunet_2023mar.onnx
+cd ..
+```
+
+详细安装说明请参考 [INSTALL.md](INSTALL.md) 文档。
 
 ## 使用方法
 
