@@ -10,16 +10,19 @@ class VideoFaceDetector:
     使用YuNet深度学习人脸检测模型，支持人脸跟踪以减少马赛克抖动
     """
     
-    def __init__(self, model_path=None):
+    def __init__(self, model_path=None, continuation_frames=5):
         """
-        初始化人脸检测器
+        初始化视频人脸检测器
         
         Args:
             model_path (str): YuNet模型文件路径，如果为None则使用默认路径
+            continuation_frames (int): 无人脸时延续打码的最大帧数，默认为5帧
         """
+        # 设置模型路径
         if model_path is None:
-            # 使用项目中的YuNet模型
-            self.model_path = os.path.join(os.path.dirname(__file__), 'models', 'face_detection_yunet_2023mar_int8bq.onnx')
+            # 使用默认的YuNet模型路径
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            self.model_path = os.path.join(current_dir, "models", "face_detection_yunet_2023mar.onnx")
         else:
             self.model_path = model_path
             
@@ -28,12 +31,13 @@ class VideoFaceDetector:
             raise ValueError(f"无法找到YuNet模型文件: {self.model_path}")
             
         # 初始化YuNet人脸检测器
-        # 输入尺寸设为320x320，置信度阈值0.9，NMS阈值0.3
+        # 降低置信度阈值以提高侧脸检测能力
+        # 输入尺寸设为320x320，置信度阈值0.6，NMS阈值0.3
         self.detector = cv2.FaceDetectorYN.create(
             model=self.model_path,
             config="",
             input_size=(320, 320),
-            score_threshold=0.9,
+            score_threshold=0.6,  # 从0.9降低到0.6，提高侧脸检测
             nms_threshold=0.3,
             top_k=5000
         )
@@ -42,10 +46,16 @@ class VideoFaceDetector:
         self.face_history = []  # 存储最近几帧的人脸位置
         self.history_length = 5  # 保持最近5帧的历史记录
         self.tracking_threshold = 50  # 人脸位置变化阈值
+        
+        # 无人脸时的延续打码策略
+        self.last_detected_faces = []  # 最后一次检测到的人脸坐标
+        self.no_face_frame_count = 0  # 连续无人脸的帧数
+        self.max_continuation_frames = max(1, continuation_frames)  # 最大延续打码帧数，至少为1帧
     
     def detect_faces_in_frame(self, frame):
         """
         在单帧图像中检测人脸
+        使用多尺度检测提高侧脸检测效果
         
         Args:
             frame (numpy.ndarray): 输入的图像帧
@@ -62,7 +72,6 @@ class VideoFaceDetector:
         # 使用YuNet检测人脸
         _, faces = self.detector.detect(frame)
         
-        # 转换检测结果格式
         face_boxes = []
         if faces is not None:
             for face in faces:
@@ -71,11 +80,70 @@ class VideoFaceDetector:
                 x, y, w, h = face[:4].astype(int)
                 face_boxes.append((x, y, w, h))
         
+        # 如果没有检测到人脸，尝试多尺度检测
+        if len(face_boxes) == 0:
+            face_boxes = self._multi_scale_detection(frame)
+        
+        return face_boxes
+    
+    def _multi_scale_detection(self, frame):
+        """
+        多尺度人脸检测，提高侧脸检测效果
+        
+        Args:
+            frame (numpy.ndarray): 输入的图像帧
+            
+        Returns:
+            list: 检测到的人脸矩形框列表
+        """
+        face_boxes = []
+        height, width = frame.shape[:2]
+        
+        # 尝试不同的输入尺寸进行检测
+        scales = [(160, 160), (240, 240), (480, 480)]
+        
+        for scale_w, scale_h in scales:
+            try:
+                # 调整检测器输入尺寸
+                self.detector.setInputSize((scale_w, scale_h))
+                
+                # 缩放图像到检测尺寸
+                resized_frame = cv2.resize(frame, (scale_w, scale_h))
+                
+                # 检测人脸
+                _, faces = self.detector.detect(resized_frame)
+                
+                if faces is not None:
+                    # 将检测结果缩放回原始尺寸
+                    scale_x = width / scale_w
+                    scale_y = height / scale_h
+                    
+                    for face in faces:
+                        x, y, w, h = face[:4].astype(int)
+                        # 缩放坐标回原始尺寸
+                        x = int(x * scale_x)
+                        y = int(y * scale_y)
+                        w = int(w * scale_x)
+                        h = int(h * scale_y)
+                        face_boxes.append((x, y, w, h))
+                    
+                    # 如果找到人脸就停止尝试其他尺度
+                    if len(face_boxes) > 0:
+                        break
+                        
+            except Exception as e:
+                # 如果某个尺度检测失败，继续尝试下一个
+                continue
+        
+        # 恢复原始输入尺寸
+        self.detector.setInputSize((width, height))
+        
         return face_boxes
     
     def track_faces_with_history(self, current_faces):
         """
         使用历史帧信息跟踪人脸，减少马赛克抖动
+        增加无人脸时延续打码策略：在检测不到人脸时，使用最后一次检测到的坐标继续打码5帧
         
         Args:
             current_faces (list): 当前帧检测到的人脸列表
@@ -83,40 +151,65 @@ class VideoFaceDetector:
         Returns:
             list: 经过跟踪平滑处理的人脸列表
         """
-        # 如果当前帧检测到人脸，直接使用并更新历史记录
+        # 如果当前帧检测到人脸
         if len(current_faces) > 0:
+            # 更新最后检测到的人脸坐标
+            self.last_detected_faces = current_faces.copy()
+            # 重置无人脸帧计数
+            self.no_face_frame_count = 0
+            
+            # 更新历史记录
             self.face_history.append(current_faces)
-            # 保持历史记录长度
             if len(self.face_history) > self.history_length:
                 self.face_history.pop(0)
             return current_faces
         
-        # 如果当前帧没有检测到人脸，尝试使用历史信息
-        if len(self.face_history) == 0:
-            return []  # 没有历史记录，返回空列表
-        
-        # 使用最近一帧的人脸位置作为预测位置
-        last_faces = self.face_history[-1]
-        
-        # 检查历史记录的一致性，如果最近几帧都有人脸，则继续使用
-        recent_frames_with_faces = 0
-        for hist_faces in self.face_history[-3:]:  # 检查最近3帧
-            if len(hist_faces) > 0:
-                recent_frames_with_faces += 1
-        
-        # 如果最近3帧中至少有2帧检测到人脸，则使用历史位置
-        if recent_frames_with_faces >= 2:
-            # 添加空的当前帧到历史记录（表示这一帧使用了预测位置）
-            self.face_history.append([])
-            if len(self.face_history) > self.history_length:
-                self.face_history.pop(0)
-            return last_faces
+        # 如果当前帧没有检测到人脸
         else:
-            # 历史记录不够一致，清空历史并返回空列表
-            self.face_history.append([])
-            if len(self.face_history) > self.history_length:
-                self.face_history.pop(0)
-            return []
+            # 增加无人脸帧计数
+            self.no_face_frame_count += 1
+            
+            # 如果有最后检测到的人脸坐标，且未超过最大延续帧数
+            if (len(self.last_detected_faces) > 0 and 
+                self.no_face_frame_count <= self.max_continuation_frames):
+                
+                # 使用最后一次检测到的坐标继续打码
+                print(f"无人脸检测，使用延续策略 (第{self.no_face_frame_count}/{self.max_continuation_frames}帧)")
+                
+                # 添加空的当前帧到历史记录（表示使用了延续策略）
+                self.face_history.append([])
+                if len(self.face_history) > self.history_length:
+                    self.face_history.pop(0)
+                    
+                return self.last_detected_faces
+            
+            # 如果超过最大延续帧数或没有历史坐标，尝试使用历史信息
+            elif len(self.face_history) > 0:
+                # 使用最近一帧的人脸位置作为预测位置
+                last_faces = self.face_history[-1]
+                
+                # 检查历史记录的一致性
+                recent_frames_with_faces = 0
+                for hist_faces in self.face_history[-3:]:  # 检查最近3帧
+                    if len(hist_faces) > 0:
+                        recent_frames_with_faces += 1
+                
+                # 如果最近3帧中至少有2帧检测到人脸，则使用历史位置
+                if recent_frames_with_faces >= 2:
+                    self.face_history.append([])
+                    if len(self.face_history) > self.history_length:
+                        self.face_history.pop(0)
+                    return last_faces
+                else:
+                    # 历史记录不够一致，清空相关记录
+                    self.face_history.append([])
+                    if len(self.face_history) > self.history_length:
+                        self.face_history.pop(0)
+                    return []
+            
+            # 没有任何可用的历史信息
+            else:
+                return []
     
     def draw_faces(self, frame, faces):
         """

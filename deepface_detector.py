@@ -17,12 +17,13 @@ class DeepFaceDetector:
     提供人脸检测、属性分析等高级功能
     """
     
-    def __init__(self, detector_backend='opencv', model_name='VGG-Face'):
+    def __init__(self, detector_backend='mtcnn', model_name='VGG-Face'):
         """
         初始化DeepFace检测器
         
         Args:
             detector_backend (str): 检测后端 ('opencv', 'ssd', 'dlib', 'mtcnn', 'retinaface')
+                                   推荐使用 'mtcnn' 或 'retinaface' 以获得更好的侧脸检测效果
             model_name (str): 人脸识别模型 ('VGG-Face', 'Facenet', 'OpenFace', 'DeepFace')
         """
         if not DEEPFACE_AVAILABLE:
@@ -31,12 +32,19 @@ class DeepFaceDetector:
         self.detector_backend = detector_backend
         self.model_name = model_name
         
-        # 支持的检测后端
+        # 支持的检测后端，按侧脸检测能力排序
         self.supported_backends = ['opencv', 'ssd', 'dlib', 'mtcnn', 'retinaface']
+        self.recommended_backends = ['mtcnn', 'retinaface']  # 推荐用于侧脸检测
+        
         if detector_backend not in self.supported_backends:
             raise ValueError(f"不支持的检测后端: {detector_backend}")
             
-        print(f"DeepFace检测器初始化完成 - 后端: {detector_backend}, 模型: {model_name}")
+        # 如果使用推荐后端，给出提示
+        if detector_backend in self.recommended_backends:
+            print(f"DeepFace检测器初始化完成 - 后端: {detector_backend} (推荐用于侧脸检测), 模型: {model_name}")
+        else:
+            print(f"DeepFace检测器初始化完成 - 后端: {detector_backend}, 模型: {model_name}")
+            print(f"提示: 推荐使用 {self.recommended_backends} 后端以获得更好的侧脸检测效果")
     
     def detect_faces_in_frame(self, frame: np.ndarray) -> List[Tuple[int, int, int, int]]:
         """
@@ -192,25 +200,31 @@ class HybridFaceDetector(VideoFaceDetector):
     继承VideoFaceDetector以复用视频处理功能
     """
     
-    def __init__(self, primary_backend='yunet', enable_deepface=False):
+    def __init__(self, primary_backend='yunet', enable_deepface=False, deepface_backend='mtcnn', continuation_frames=5):
         """
         初始化混合检测器
         
         Args:
             primary_backend (str): 主要检测后端 ('yunet' 或 'deepface')
             enable_deepface (bool): 是否启用DeepFace高级功能
+            deepface_backend (str): DeepFace检测后端
+            continuation_frames (int): 无人脸时延续打码的最大帧数
         """
-        # 调用父类初始化方法
-        super().__init__()
+        # 调用父类初始化方法，传递continuation_frames参数
+        super().__init__(continuation_frames=continuation_frames)
         
         self.primary_backend = primary_backend
         self.enable_deepface = enable_deepface and DEEPFACE_AVAILABLE
+        self.deepface_backend = deepface_backend
         
         # 初始化DeepFace检测器
         if self.enable_deepface:
-            self.deepface_detector = DeepFaceDetector()
+            self.deepface_detector = DeepFaceDetector(detector_backend=deepface_backend)
         
         print(f"混合检测器初始化完成 - 主后端: {primary_backend}, DeepFace: {self.enable_deepface}")
+        if self.enable_deepface:
+            print(f"DeepFace后端: {deepface_backend}")
+        print(f"延续打码策略: {continuation_frames}帧")
     
     def detect_faces(self, frame: np.ndarray) -> List[Dict]:
         """

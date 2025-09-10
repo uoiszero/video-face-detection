@@ -30,13 +30,15 @@ def parse_arguments():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 示例用法:
-  python main.py video.mp4                           # 使用YuNet检测器，仅检测不保存
+  python main.py video.mp4                           # 使用YuNet检测器，仅检测不保存(已优化侧脸检测,延续打码5帧)
   python main.py video.mp4 --output result.mp4      # 检测并保存结果视频
   python main.py video.mp4 --preview                # 检测并显示实时预览
-  python main.py video.mp4 --detector deepface      # 使用DeepFace检测器（高精度）
-  python main.py video.mp4 --detector hybrid        # 使用混合检测器（YuNet+DeepFace）
+  python main.py video.mp4 --detector deepface --deepface-backend mtcnn      # 使用DeepFace检测器(MTCNN后端,适合侧脸)
+  python main.py video.mp4 --detector deepface --deepface-backend retinaface # 使用DeepFace检测器(RetinaFace后端,适合侧脸)
+  python main.py video.mp4 --detector hybrid --deepface-backend mtcnn        # 使用混合检测器（YuNet+DeepFace）
   python main.py video.mp4 --mosaic --output mosaic.mp4  # 应用马赛克并保存
   python main.py video.mp4 --mosaic --mosaic-size 10 --preview  # 细腻马赛克预览
+  python main.py video.mp4 --continuation-frames 10 --mosaic --output output.mp4  # 延续打码10帧策略
         """
     )
     
@@ -79,6 +81,20 @@ def parse_arguments():
         choices=['yunet', 'deepface', 'hybrid'],
         default='yunet',
         help='选择人脸检测器：yunet（默认，快速）、deepface（高精度）、hybrid（混合模式）'
+    )
+    
+    parser.add_argument(
+        '--deepface-backend',
+        choices=['opencv', 'ssd', 'dlib', 'mtcnn', 'retinaface'],
+        default='mtcnn',
+        help='DeepFace检测后端（仅在使用deepface或hybrid时有效）：opencv、ssd、dlib、mtcnn（默认，推荐）、retinaface（推荐）'
+    )
+    
+    parser.add_argument(
+        '--continuation-frames',
+        type=int,
+        default=5,
+        help='无人脸检测时延续打码的帧数（默认：5帧）'
     )
     
     return parser.parse_args()
@@ -137,21 +153,21 @@ def main():
         # 创建人脸检测器
         if args.detector == 'yunet':
             print("初始化YuNet人脸检测器...")
-            detector = VideoFaceDetector(model_path=args.model)
+            detector = VideoFaceDetector(model_path=args.model, continuation_frames=args.continuation_frames)
         elif args.detector == 'deepface':
             if not DEEPFACE_AVAILABLE:
                 print("错误: DeepFace不可用，请先安装DeepFace或选择其他检测器")
                 print("安装命令: pip install deepface")
                 sys.exit(1)
-            print("初始化DeepFace检测器...")
-            detector = HybridFaceDetector(primary_backend='retinaface', enable_deepface=True)
+            print(f"初始化DeepFace检测器 - 后端: {args.deepface_backend}...")
+            detector = HybridFaceDetector(primary_backend=args.deepface_backend, enable_deepface=True, continuation_frames=args.continuation_frames)
         elif args.detector == 'hybrid':
             if not DEEPFACE_AVAILABLE:
                 print("错误: DeepFace不可用，回退到YuNet检测器")
-                detector = VideoFaceDetector(model_path=args.model)
+                detector = VideoFaceDetector(model_path=args.model, continuation_frames=args.continuation_frames)
             else:
-                print("初始化混合检测器（YuNet + DeepFace）...")
-                detector = HybridFaceDetector(primary_backend='yunet', enable_deepface=True)
+                print(f"初始化混合检测器（YuNet + DeepFace） - DeepFace后端: {args.deepface_backend}...")
+                detector = HybridFaceDetector(primary_backend='yunet', enable_deepface=True, deepface_backend=args.deepface_backend, continuation_frames=args.continuation_frames)
         else:
             print("错误: 未知的检测器类型")
             sys.exit(1)
