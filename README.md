@@ -125,6 +125,29 @@ cd ..
 
 ## 使用方法
 
+### 🚀 一键打码（推荐）
+
+最简单的使用方式，使用优化配置进行视频打码：
+
+```bash
+# Python版本（跨平台）
+python quick_mosaic.py input_video.mp4
+
+# Shell版本（macOS/Linux）
+chmod +x quick_mosaic.sh
+./quick_mosaic.sh input_video.mp4
+
+# 批处理版本（Windows）
+quick_mosaic.bat input_video.mp4
+```
+
+**一键打码特性：**
+- ✅ 混合检测器（YuNet + DeepFace）
+- ✅ 侧脸检测优化（RetinaFace后端）
+- ✅ 延续打码（15帧）
+- ✅ 自动生成输出文件名（原文件名_out_时间戳.扩展名）
+- ✅ 智能依赖检查和错误处理
+
 ### 命令行使用
 
 #### 基本用法
@@ -344,14 +367,17 @@ python example.py
 
 ```
 video-face-detection/
-├── main.py                 # 主程序入口
-├── face_detector.py        # YuNet人脸检测核心模块
-├── deepface_detector.py    # DeepFace集成模块
-├── models/                 # 模型文件目录
+├── main.py                    # 主程序入口
+├── face_detector.py           # YuNet人脸检测核心模块
+├── deepface_detector.py       # DeepFace集成模块
+├── quick_mosaic.py            # 一键打码脚本（Python）
+├── quick_mosaic.sh            # 一键打码脚本（Shell）
+├── quick_mosaic.bat           # 一键打码脚本（Windows）
+├── models/                    # 模型文件目录
 │   └── face_detection_yunet_2023mar.onnx
-├── requirements.txt        # 依赖包列表
+├── requirements.txt           # 依赖包列表
 ├── CONTINUATION_FRAMES_DEBUG.md  # 延续打码功能调试文档
-└── README.md              # 项目说明文档
+└── README.md                 # 项目说明文档
 ```
 
 ## 技术实现
@@ -455,6 +481,13 @@ video-face-detection/
 欢迎提交 Issue 和 Pull Request 来改进这个项目！
 
 ## 更新日志
+
+### v3.1.0 (2024-01-15)
+- 🚀 **新增一键打码脚本**：Python/Shell/Windows批处理三种版本
+- 📝 **自动文件命名**：智能生成带时间戳的输出文件名
+- 🔍 **智能依赖检查**：自动检测和提示缺失的依赖包
+- 🎨 **彩色界面输出**：跨平台彩色终端界面，提升用户体验
+- ⚡ **简化使用流程**：一条命令完成视频打码处理
 
 ### v3.0.0 (2024-01)
 - 🔄 **新增侧脸检测优化**：集成DeepFace多后端支持
