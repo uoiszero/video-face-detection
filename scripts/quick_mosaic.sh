@@ -10,6 +10,10 @@
 #   
 # 输出文件将自动命名为: input_video_out_20231201_143022.mp4
 
+# 切换到脚本所在目录
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
 # 颜色定义
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -61,8 +65,8 @@ check_dependencies() {
         missing_files+=("../main.py")
     fi
     
-    if [[ ! -f "models/face_detection_yunet_2023mar.onnx" ]]; then
-        missing_files+=("models/face_detection_yunet_2023mar.onnx")
+    if [[ ! -f "../models/face_detection_yunet_2023mar.onnx" ]]; then
+        missing_files+=("../models/face_detection_yunet_2023mar.onnx")
     fi
     
     if [[ ${#missing_files[@]} -gt 0 ]]; then
