@@ -121,7 +121,7 @@ wget https://github.com/opencv/opencv_zoo/raw/master/models/face_detection_yunet
 cd ..
 ```
 
-详细安装说明请参考 [INSTALL.md](INSTALL.md) 文档。
+详细安装说明请参考 [docs/INSTALL.md](docs/INSTALL.md) 文档。
 
 ## 使用方法
 
@@ -376,7 +376,14 @@ video-face-detection/
 ├── models/                    # 模型文件目录
 │   └── face_detection_yunet_2023mar.onnx
 ├── requirements.txt           # 依赖包列表
-├── CONTINUATION_FRAMES_DEBUG.md  # 延续打码功能调试文档
+├── docs/                    # 文档目录
+│   ├── INSTALL.md             # 安装指南
+│   ├── QUICK_START.md         # 快速开始指南
+│   ├── CONTINUATION_FRAMES_DEBUG.md # 延续打码调试文档
+│   ├── GUI_USAGE_GUIDE.md
+│   ├── DEEPFACE_INTEGRATION_GUIDE.md
+│   ├── DEEPFACE_MOSAIC_USAGE.md
+│   └── POSITION_FIX_GUIDE.md
 └── README.md                 # 项目说明文档
 ```
 
