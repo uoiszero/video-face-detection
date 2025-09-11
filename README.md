@@ -4,6 +4,7 @@
 
 ## 功能特性
 
+### 🎯 核心功能
 - 🎥 支持多种视频格式（MP4、AVI、MOV、MKV等）
 - 👤 使用YuNet深度学习模型进行高精度人脸检测
 - 🔄 **侧脸检测优化**：多尺度检测技术，显著提升侧脸和困难角度的检测效果
@@ -16,6 +17,15 @@
 - 🛠️ 简单易用的命令行界面
 - 🧠 **DeepFace集成**：多后端支持（MTCNN、RetinaFace等），可选的高级人脸分析功能
 - 🔀 **混合检测器**：结合YuNet和DeepFace的优势，提供最佳检测效果
+
+### 🎨 图形界面功能
+- **现代化界面**: 基于PyQt5的美观用户界面
+- **可视化操作**: 通过鼠标点击完成所有操作，无需命令行
+- **实时进度显示**: 图形化进度条和详细处理日志
+- **文件浏览器**: 便捷的文件选择和路径管理
+- **参数可视化**: 滑块和下拉菜单直观设置参数
+- **多检测器支持**: 支持hybrid、yunet、retinaface等多种检测器
+- **多种输出模式**: 支持马赛克、模糊、黑框等多种处理效果
 
 ## 技术特性
 
@@ -77,6 +87,13 @@
 - RetinaFace 0.0.13+
 - macOS / Linux / Windows
 
+### GUI界面依赖
+
+```bash
+# 安装PyQt5
+pip install PyQt5
+```
+
 ## 🚀 快速安装
 
 ### 一键安装脚本（推荐）
@@ -124,6 +141,22 @@ cd ..
 详细安装说明请参考 [docs/INSTALL.md](docs/INSTALL.md) 文档。
 
 ## 使用方法
+
+### 🎨 GUI图形界面（推荐）
+
+项目提供了基于PyQt5的现代化图形用户界面，让您无需使用命令行即可轻松处理视频：
+
+```bash
+python gui_mosaic_pyqt.py
+```
+
+**功能特性：**
+- 🎨 现代化界面：基于PyQt5的美观界面
+- 🔄 多检测器支持：hybrid、yunet、retinaface等
+- 👤 侧脸检测：专门的侧脸检测器选择
+- 🎭 输出模式：支持马赛克、模糊、黑框等多种效果
+- ⚡ 延续帧数：智能的人脸跟踪优化
+- 📋 实时日志：详细的处理过程显示
 
 ### 🚀 一键打码（推荐）
 
@@ -367,9 +400,10 @@ python example.py
 
 ```
 video-face-detection/
-├── main.py                    # 主程序入口
+├── main.py                    # 主程序入口（命令行版本）
 ├── face_detector.py           # YuNet人脸检测核心模块
 ├── deepface_detector.py       # DeepFace集成模块
+├── gui_mosaic_pyqt.py         # PyQt5版本GUI应用
 ├── quick_mosaic.py            # 一键打码脚本（Python）
 ├── scripts/                   # 脚本文件目录
 │   ├── quick_mosaic.sh        # 一键打码脚本（Shell）
@@ -381,12 +415,25 @@ video-face-detection/
 │   ├── INSTALL.md             # 安装指南
 │   ├── QUICK_START.md         # 快速开始指南
 │   ├── CONTINUATION_FRAMES_DEBUG.md # 延续打码调试文档
-│   ├── GUI_USAGE_GUIDE.md
+│   ├── GUI_USAGE_GUIDE.md     # GUI使用指南
 │   ├── DEEPFACE_INTEGRATION_GUIDE.md
 │   ├── DEEPFACE_MOSAIC_USAGE.md
 │   └── POSITION_FIX_GUIDE.md
 └── README.md                 # 项目说明文档
 ```
+
+### 文件说明
+
+#### 核心文件
+- `main.py`: 命令行版本的主程序入口
+- `face_detector.py`: 包含VideoFaceDetector类，实现核心人脸检测功能
+- `deepface_detector.py`: 混合检测器，结合多种检测技术
+
+#### GUI文件
+- `gui_mosaic_pyqt.py`: 基于PyQt5的现代化界面，提供完整的GUI体验
+
+#### 文档文件
+- `docs/GUI_USAGE_GUIDE.md`: 详细的GUI使用指南和功能说明
 
 ## 技术实现
 
@@ -483,6 +530,20 @@ video-face-detection/
 - 计算机视觉项目的基础工具
 - 教学和演示用途
 - 多检测器性能对比研究
+
+### 👥 不同用户群体
+
+#### 🖱️ PyQt5 GUI界面适合：
+- **普通用户**: 不熟悉命令行操作的用户
+- **设计师/编辑**: 需要现代化可视化界面的创意工作者
+- **教育工作者**: 需要简单易用工具的教师和学生
+- **一次性使用**: 偶尔需要处理视频的用户
+
+#### ⌨️ 命令行适合：
+- **开发者**: 熟悉命令行的技术人员
+- **批量处理**: 需要自动化脚本的场景
+- **服务器环境**: 无图形界面的服务器部署
+- **高级用户**: 需要精确控制参数的专业用户
 
 ## 贡献
 
