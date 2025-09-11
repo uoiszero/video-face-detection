@@ -86,7 +86,7 @@ if exist "requirements.txt" (
 echo 📦 逐个安装必需包...
 
 REM 基础依赖列表
-set packages=opencv-python>=4.8.0 numpy>=1.21.0 deepface>=0.0.79 tensorflow>=2.12.0 mtcnn>=0.1.1 retina-face>=0.0.13
+set packages=opencv-python>=4.8.0 numpy>=1.21.0 deepface>=0.0.79 tensorflow>=2.12.0 mtcnn>=0.1.1 retina-face>=0.0.13 PyQt5>=5.15.0
 
 for %%p in (%packages%) do (
     echo 📦 安装 %%p...
@@ -145,7 +145,8 @@ test_packages = [
     ('cv2', 'OpenCV'),
     ('numpy', 'NumPy'),
     ('deepface', 'DeepFace'),
-    ('tensorflow', 'TensorFlow')
+    ('tensorflow', 'TensorFlow'),
+    ('PyQt5.QtWidgets', 'PyQt5')
 ]
 
 failed = []

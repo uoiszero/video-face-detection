@@ -120,6 +120,7 @@ install_python_deps() {
             "tensorflow>=2.12.0"
             "mtcnn>=0.1.1"
             "retina-face>=0.0.13"
+            "PyQt5>=5.15.0"
         )
         
         for package in "${PACKAGES[@]}"; do
@@ -188,7 +189,8 @@ test_packages = [
     ('cv2', 'OpenCV'),
     ('numpy', 'NumPy'),
     ('deepface', 'DeepFace'),
-    ('tensorflow', 'TensorFlow')
+    ('tensorflow', 'TensorFlow'),
+    ('PyQt5.QtWidgets', 'PyQt5')
 ]
 
 failed = []

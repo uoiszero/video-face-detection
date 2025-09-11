@@ -4,6 +4,7 @@
 opencv-python==4.8.1.78
 numpy==1.24.3
 argparse
+PyQt5>=5.15.0
 
 # 可选依赖（高级功能）
 # 取消注释以下行来启用DeepFace人脸分析功能
