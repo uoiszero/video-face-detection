@@ -40,8 +40,6 @@ def parse_arguments():
   python main.py video.mp4 --mosaic --mosaic-size 10 --preview  # 细腻马赛克预览
   python main.py video.mp4 --continuation-frames 10 --mosaic --output output.mp4  # 延续打码10帧策略
   python main.py video.mp4 --output result.mp4 --codec h264     # 使用H.264编码器输出
-  python main.py video.mp4 --output result.mp4 --codec h265     # 使用H.265编码器输出（更高压缩率）
-  python main.py video.mp4 --output result.mp4 --codec av1      # 使用AV1编码器输出（最新标准）
         """
     )
     
@@ -102,9 +100,9 @@ def parse_arguments():
     
     parser.add_argument(
         '--codec', '--encoder',
-        choices=['h264', 'h265', 'av1', 'xvid', 'mp4v', 'auto'],
+        choices=['h264', 'auto'],
         default='auto',
-        help='输出视频编码器：h264（H.264/AVC）、h265（H.265/HEVC）、av1（AV1）、xvid（XVID）、mp4v（MPEG-4）、auto（自动选择，默认）'
+        help='输出视频编码器：h264（H.264/AVC）、auto（自动选择，默认）'
     )
     
     return parser.parse_args()

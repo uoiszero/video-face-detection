@@ -315,10 +315,8 @@ class MosaicGUI(QMainWindow):
         self.codec_group = QButtonGroup()
         
         codecs = [
-            ("输入编码（推荐）", "auto"),
-            ("H.264", "h264"),
-            ("H.265", "h265"),
-            ("AV1", "av1")
+            ("源文件编码", "auto"),
+            ("H.264", "h264")
         ]
         
         for text, value in codecs:
