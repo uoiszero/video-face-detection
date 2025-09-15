@@ -39,6 +39,9 @@ def parse_arguments():
   python main.py video.mp4 --mosaic --output mosaic.mp4  # 应用马赛克并保存
   python main.py video.mp4 --mosaic --mosaic-size 10 --preview  # 细腻马赛克预览
   python main.py video.mp4 --continuation-frames 10 --mosaic --output output.mp4  # 延续打码10帧策略
+  python main.py video.mp4 --output result.mp4 --codec h264     # 使用H.264编码器输出
+  python main.py video.mp4 --output result.mp4 --codec h265     # 使用H.265编码器输出（更高压缩率）
+  python main.py video.mp4 --output result.mp4 --codec av1      # 使用AV1编码器输出（最新标准）
         """
     )
     
@@ -95,6 +98,13 @@ def parse_arguments():
         type=int,
         default=5,
         help='无人脸检测时延续打码的帧数（默认：5帧）'
+    )
+    
+    parser.add_argument(
+        '--codec', '--encoder',
+        choices=['h264', 'h265', 'av1', 'xvid', 'mp4v', 'auto'],
+        default='auto',
+        help='输出视频编码器：h264（H.264/AVC）、h265（H.265/HEVC）、av1（AV1）、xvid（XVID）、mp4v（MPEG-4）、auto（自动选择，默认）'
     )
     
     return parser.parse_args()
@@ -176,6 +186,7 @@ def main():
         print(f"输入视频: {args.input_video}")
         if args.output:
             print(f"输出视频: {args.output}")
+            print(f"输出编码器: {args.codec}")
         if args.preview:
             print("实时预览: 启用 (按 'q' 键退出预览)")
         if args.mosaic:
@@ -187,7 +198,8 @@ def main():
             output_path=args.output,
             show_preview=args.preview,
             apply_mosaic=args.mosaic,
-            mosaic_size=args.mosaic_size
+            mosaic_size=args.mosaic_size,
+            codec=args.codec
         )
         
         # 显示处理结果摘要

@@ -3,6 +3,30 @@ import numpy as np
 import os
 import time
 
+def get_codec_fourcc(codec_name):
+    """
+    根据编码器名称获取对应的fourcc代码
+    
+    Args:
+        codec_name (str): 编码器名称
+        
+    Returns:
+        tuple: (fourcc代码, 编码器描述)
+    """
+    codec_map = {
+        'h264': (cv2.VideoWriter_fourcc(*'H264'), 'H.264/AVC'),
+        'h265': (cv2.VideoWriter_fourcc(*'HEVC'), 'H.265/HEVC'),
+        'av1': (cv2.VideoWriter_fourcc(*'AV01'), 'AV1'),
+        'xvid': (cv2.VideoWriter_fourcc(*'XVID'), 'XVID'),
+        'mp4v': (cv2.VideoWriter_fourcc(*'mp4v'), 'MPEG-4')
+    }
+    
+    if codec_name.lower() in codec_map:
+        return codec_map[codec_name.lower()]
+    else:
+        # 默认返回H.264
+        return codec_map['h264']
+
 class VideoFaceDetector:
     """
     视频人脸检测器类
@@ -292,7 +316,7 @@ class VideoFaceDetector:
         
         return result_frame
     
-    def process_video(self, input_path, output_path=None, show_preview=False, apply_mosaic=False, mosaic_size=15, progress_callback=None):
+    def process_video(self, input_path, output_path=None, show_preview=False, apply_mosaic=False, mosaic_size=15, progress_callback=None, codec='auto'):
         """
         处理视频文件，检测其中的人脸
         
@@ -303,6 +327,7 @@ class VideoFaceDetector:
             apply_mosaic (bool): 是否对人脸应用马赛克效果
             mosaic_size (int): 马赛克块大小，仅在apply_mosaic=True时有效
             progress_callback (callable): 进度回调函数，接收(当前帧数, 总帧数)参数，返回是否继续处理
+            codec (str): 输出视频编码器，支持 'h264', 'h265', 'av1', 'xvid', 'mp4v', 'auto'
             
         Returns:
             dict: 处理结果统计信息
@@ -332,40 +357,44 @@ class VideoFaceDetector:
         # 设置输出视频编码器
         out = None
         if output_path:
-            # 首先尝试使用与输入视频相同的编码器
-            if input_fourcc != 0:  # 确保获取到了有效的编码器信息
-                print(f"尝试使用输入视频的编码器: {input_codec}")
-                out = cv2.VideoWriter(output_path, input_fourcc, fps, (width, height))
-            
-            # 如果输入编码器不可用或无效，尝试使用H.264编码器
-            if not out or not out.isOpened():
-                print("输入编码器不可用，尝试使用H.264编码器")
-                fourcc = cv2.VideoWriter_fourcc(*'H264')
-                out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
-            
-            # 如果H.264不可用，尝试使用avc1编码器（H.264的另一种标识）
-            if not out.isOpened():
-                print("H.264编码器不可用，尝试使用avc1编码器")
-                fourcc = cv2.VideoWriter_fourcc(*'avc1')
-                out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
-            
-            # 如果avc1不可用，回退到XVID编码器
-            if not out.isOpened():
-                print("avc1编码器不可用，尝试使用XVID编码器")
-                fourcc = cv2.VideoWriter_fourcc(*'XVID')
+            if codec == 'auto':
+                # 自动模式：首先尝试使用与输入视频相同的编码器
+                if input_fourcc != 0:  # 确保获取到了有效的编码器信息
+                    print(f"自动模式：尝试使用输入视频的编码器: {input_codec}")
+                    out = cv2.VideoWriter(output_path, input_fourcc, fps, (width, height))
+                
+                # 如果输入编码器不可用，按优先级尝试常用编码器
+                fallback_codecs = ['h264', 'xvid', 'mp4v']
+                for fallback_codec in fallback_codecs:
+                    if not out or not out.isOpened():
+                        fourcc, codec_desc = get_codec_fourcc(fallback_codec)
+                        print(f"尝试使用 {codec_desc} 编码器")
+                        out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
+                        if out.isOpened():
+                            print(f"成功初始化 {codec_desc} 编码器")
+                            break
+            else:
+                # 指定编码器模式
+                fourcc, codec_desc = get_codec_fourcc(codec)
+                print(f"使用指定的 {codec_desc} 编码器")
                 out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
                 
-            # 如果XVID也不可用，使用mp4v作为最后的选择
-            if not out.isOpened():
-                print("XVID编码器不可用，使用mp4v编码器")
-                fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-                out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
+                # 如果指定的编码器不可用，尝试备用编码器
+                if not out.isOpened():
+                    print(f"{codec_desc} 编码器不可用，尝试备用编码器")
+                    fallback_codecs = ['h264', 'xvid', 'mp4v']
+                    for fallback_codec in fallback_codecs:
+                        if fallback_codec != codec:  # 跳过已经尝试过的编码器
+                            fourcc, fallback_desc = get_codec_fourcc(fallback_codec)
+                            print(f"尝试使用备用 {fallback_desc} 编码器")
+                            out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
+                            if out.isOpened():
+                                print(f"成功初始化备用 {fallback_desc} 编码器")
+                                break
                 
             # 检查编码器是否成功初始化
-            if not out.isOpened():
-                raise ValueError(f"无法初始化视频编码器，请检查输出路径: {output_path}")
-            
-            print(f"成功初始化视频编码器")
+            if not out or not out.isOpened():
+                raise ValueError(f"无法初始化任何视频编码器，请检查输出路径和系统编码器支持: {output_path}")
         
         # 统计信息
         processed_frames = 0

@@ -90,6 +90,7 @@ class MosaicGUI(QMainWindow):
         self.detector = "hybrid"
         self.profile_detector = "retinaface"
         self.output_mode = "mosaic"
+        self.codec = "auto"
         self.mosaic_size = 20
         self.continuation_frames = 15
         
@@ -125,13 +126,16 @@ class MosaicGUI(QMainWindow):
         # 5. 输出模式选择
         self.create_output_mode_selector(layout)
         
-        # 6. 马赛克大小设置
+        # 6. 编码器选择
+        self.create_codec_selector(layout)
+        
+        # 7. 马赛克大小设置
         self.create_mosaic_size_selector(layout)
         
-        # 7. 延续帧数设置
+        # 8. 延续帧数设置
         self.create_continuation_frames_selector(layout)
         
-        # 8. 输出日志区域
+        # 9. 输出日志区域
         self.create_output_log(layout)
         
         # 控制按钮
@@ -295,6 +299,40 @@ class MosaicGUI(QMainWindow):
                 
         mode_layout.addStretch()
         layout.addLayout(mode_layout)
+        
+    def create_codec_selector(self, layout):
+        """创建编码器选择器
+        
+        Args:
+            layout: 父布局
+        """
+        # 标签
+        layout.addWidget(self.create_section_label("输出编码器:"))
+        
+        # 单选按钮布局
+        codec_layout = QHBoxLayout()
+        
+        self.codec_group = QButtonGroup()
+        
+        codecs = [
+            ("输入编码（推荐）", "auto"),
+            ("H.264", "h264"),
+            ("H.265", "h265"),
+            ("AV1", "av1")
+        ]
+        
+        for text, value in codecs:
+            radio = QRadioButton(text)
+            radio.setProperty("value", value)
+            radio.toggled.connect(self.on_codec_changed)
+            self.codec_group.addButton(radio)
+            codec_layout.addWidget(radio)
+            
+            if value == "auto":
+                radio.setChecked(True)
+                
+        codec_layout.addStretch()
+        layout.addLayout(codec_layout)
         
     def create_mosaic_size_selector(self, layout):
         """创建马赛克大小选择器
@@ -462,6 +500,12 @@ class MosaicGUI(QMainWindow):
                 self.mosaic_label.setEnabled(is_mosaic)
                 self.mosaic_value_label.setEnabled(is_mosaic)
             
+    def on_codec_changed(self):
+        """编码器改变时的回调"""
+        sender = self.sender()
+        if sender.isChecked():
+            self.codec = sender.property("value")
+            
     def on_mosaic_size_changed(self, value):
         """马赛克大小改变时的回调
         
@@ -554,6 +598,9 @@ class MosaicGUI(QMainWindow):
         # 延续帧数
         cmd.extend(["--continuation-frames", str(self.continuation_frames)])
         
+        # 编码器
+        cmd.extend(["--codec", self.codec])
+        
         return cmd
         
     def start_processing(self):
@@ -631,6 +678,7 @@ class MosaicGUI(QMainWindow):
         self.detector = "hybrid"
         self.profile_detector = "retinaface"
         self.output_mode = "mosaic"
+        self.codec = "auto"
         self.mosaic_size = 20
         self.continuation_frames = 15
         
@@ -649,6 +697,10 @@ class MosaicGUI(QMainWindow):
                 
         for button in self.mode_group.buttons():
             if button.property("value") == "mosaic":
+                button.setChecked(True)
+                
+        for button in self.codec_group.buttons():
+            if button.property("value") == "auto":
                 button.setChecked(True)
                 
         # 重置滑块
