@@ -6,6 +6,10 @@
 """
 
 import os
+import pytest
+
+if not os.getenv("VFD_RUN_INTEGRATION"):
+    pytest.skip("integration test (set VFD_RUN_INTEGRATION=1 to enable)", allow_module_level=True)
 from face_detector import VideoFaceDetector
 
 def test_anti_jitter_mosaic():

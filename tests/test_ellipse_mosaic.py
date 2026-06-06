@@ -7,10 +7,15 @@
 展示了更自然的人脸遮挡效果。
 """
 
+import os
+import pytest
+
+if not os.getenv("VFD_RUN_INTEGRATION"):
+    pytest.skip("integration test (set VFD_RUN_INTEGRATION=1 to enable)", allow_module_level=True)
+
 import cv2
 import numpy as np
 from face_detector import VideoFaceDetector
-import os
 
 def create_comparison_demo():
     """

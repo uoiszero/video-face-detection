@@ -5,6 +5,12 @@ tkinter GUI测试脚本
 用于诊断GUI显示问题
 """
 
+import os
+import pytest
+
+if not os.getenv("VFD_RUN_GUI_TESTS"):
+    pytest.skip("gui test (set VFD_RUN_GUI_TESTS=1 to enable)", allow_module_level=True)
+
 import tkinter as tk
 from tkinter import ttk
 import sys

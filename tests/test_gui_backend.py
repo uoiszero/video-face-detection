@@ -7,6 +7,10 @@
 import sys
 import os
 from pathlib import Path
+import pytest
+
+if not os.getenv("VFD_RUN_INTEGRATION"):
+    pytest.skip("integration test (set VFD_RUN_INTEGRATION=1 to enable)", allow_module_level=True)
 
 # 导入检测器
 from face_detector import VideoFaceDetector

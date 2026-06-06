@@ -67,5 +67,10 @@ ENV/
 *.mkv
 *.mk3d
 
+# 输出产物
+outputs/*
+!outputs/.gitkeep
+outputs/.tmp/
+
 # 模型文件目录
 momodels/
