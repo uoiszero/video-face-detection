@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Job {{ job_id }}</title>
+  </head>
+  <body>
+    <h1>Job {{ job_id }}</h1>
+    <pre id="snapshot">loading...</pre>
+
+    <script>
+      const pre = document.getElementById("snapshot");
+      const es = new EventSource(`/api/jobs/{{ job_id }}/events`);
+
+      es.addEventListener("snapshot", (ev) => {
+        try {
+          const payload = JSON.parse(ev.data);
+          pre.textContent = JSON.stringify(payload, null, 2);
+          if (payload.status === "succeeded" || payload.status === "failed") {
+            es.close();
+          }
+        } catch (e) {
+          pre.textContent = String(ev.data);
+        }
+      });
+
+      es.addEventListener("error", (ev) => {
+        es.close();
+      });
+    </script>
+  </body>
+</html>

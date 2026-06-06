@@ -7,9 +7,53 @@
   </head>
   <body>
     <h1>VFD WebUI</h1>
-    <form method="get" action="/">
-      <label for="input_path">输入文件</label>
-      <input id="input_path" name="input_path" type="text" />
+    <form method="post" action="/jobs">
+      <div>
+        <label for="input_path">input_path</label>
+        <input id="input_path" name="input_path" type="text" />
+      </div>
+      <div>
+        <label for="detector">detector</label>
+        <select id="detector" name="detector">
+          <option value="yunet">yunet</option>
+          <option value="deepface">deepface</option>
+          <option value="hybrid">hybrid</option>
+        </select>
+      </div>
+      <div>
+        <label for="deepface_backend">deepface_backend</label>
+        <input id="deepface_backend" name="deepface_backend" type="text" value="opencv" />
+      </div>
+      <div>
+        <label for="continuation_frames">continuation_frames</label>
+        <input id="continuation_frames" name="continuation_frames" type="number" value="5" />
+      </div>
+      <div>
+        <label for="output_resolution">output_resolution</label>
+        <input id="output_resolution" name="output_resolution" type="text" value="original" />
+      </div>
+      <div>
+        <label for="video_bitrate">video_bitrate</label>
+        <input id="video_bitrate" name="video_bitrate" type="text" value="" />
+      </div>
+      <div>
+        <label for="codec">codec</label>
+        <select id="codec" name="codec">
+          <option value="auto">auto</option>
+          <option value="h264">h264</option>
+        </select>
+      </div>
+      <div>
+        <label for="apply_mosaic">apply_mosaic</label>
+        <select id="apply_mosaic" name="apply_mosaic">
+          <option value="false">false</option>
+          <option value="true">true</option>
+        </select>
+      </div>
+      <div>
+        <label for="mosaic_size">mosaic_size</label>
+        <input id="mosaic_size" name="mosaic_size" type="number" value="15" />
+      </div>
       <button type="submit">提交</button>
     </form>
   </body>
