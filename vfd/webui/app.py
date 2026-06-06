@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Callable, Optional
 
 from fastapi import FastAPI, Form, HTTPException, Request
-from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
@@ -123,6 +123,7 @@ def create_app(
 
     @app.post("/jobs")
     def create_job(
+        request: Request,
         input_path: str = Form(...),
         detector: str = Form(...),
         deepface_backend: str = Form("opencv"),
@@ -132,7 +133,7 @@ def create_app(
         codec: str = Form("auto"),
         apply_mosaic: str = Form("false"),
         mosaic_size: int = Form(15),
-    ) -> JSONResponse:
+    ) -> object:
         """
         创建并启动一个 job。
         """
@@ -166,7 +167,10 @@ def create_app(
         else:
             _run_job(job.id, params)
 
-        return JSONResponse({"id": job.id, "url": f"/jobs/{job.id}"})
+        accept = request.headers.get("accept", "")
+        if "application/json" in accept:
+            return JSONResponse({"id": job.id, "url": f"/jobs/{job.id}"})
+        return RedirectResponse(url=f"/jobs/{job.id}", status_code=303)
 
     @app.get("/api/jobs/{job_id}")
     def get_job(job_id: str) -> JSONResponse:

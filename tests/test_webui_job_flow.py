@@ -37,6 +37,7 @@ def test_create_job_runs_and_can_query_status_success():
 
     resp = client.post(
         "/jobs",
+        headers={"accept": "application/json"},
         data={
             "input_path": "/tmp/a.mp4",
             "detector": "yunet",
@@ -68,6 +69,7 @@ def test_events_endpoint_returns_event_stream_and_has_data_field():
 
     resp = client.post(
         "/jobs",
+        headers={"accept": "application/json"},
         data={
             "input_path": "/tmp/a.mp4",
             "detector": "yunet",
@@ -92,3 +94,27 @@ def test_events_endpoint_returns_event_stream_and_has_data_field():
     snapshot = json.loads(data_lines[-1].removeprefix("data:").strip())
     assert snapshot["id"] == job_id
     assert snapshot["status"] in (JobStatus.succeeded.value, JobStatus.failed.value)
+
+
+def test_create_job_redirects_to_job_page_for_browser_form_submit():
+    app = create_app(runner=_fake_runner, run_async=False)
+    client = TestClient(app)
+
+    resp = client.post(
+        "/jobs",
+        data={
+            "input_path": "/tmp/a.mp4",
+            "detector": "yunet",
+            "deepface_backend": "opencv",
+            "continuation_frames": "5",
+            "output_resolution": "original",
+            "video_bitrate": "",
+            "codec": "auto",
+            "apply_mosaic": "false",
+            "mosaic_size": "15",
+        },
+        follow_redirects=False,
+    )
+
+    assert resp.status_code == 303
+    assert resp.headers["location"].startswith("/jobs/")
