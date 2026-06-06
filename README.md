@@ -18,8 +18,14 @@
 - 🧠 **DeepFace集成**：多后端支持（MTCNN、RetinaFace等），可选的高级人脸分析功能
 - 🔀 **混合检测器**：结合YuNet和DeepFace的优势，提供最佳检测效果
 
-### 🎨 图形界面功能
-- **现代化界面**: 基于PyQt5的美观用户界面
+### 🌐 WebUI 功能（推荐）
+- 基于 FastAPI + Jinja2 的轻量 WebUI
+- 提交任务后生成 Job 页面，实时查看进度与日志（SSE）
+- 支持 yunet / deepface / hybrid 三种检测器（deepface/hybrid 需要额外依赖）
+- 支持输出分辨率、码率与编码器选择（启用转码时需要 ffmpeg）
+
+### 🎨 旧 GUI（Deprecated）
+- **现代化界面**: 基于PyQt5的桌面界面（未来版本可能移除）
 - **可视化操作**: 通过鼠标点击完成所有操作，无需命令行
 - **实时进度显示**: 图形化进度条和详细处理日志
 - **文件浏览器**: 便捷的文件选择和路径管理
@@ -142,21 +148,48 @@ cd ..
 
 ## 使用方法
 
-### 🎨 GUI图形界面（推荐）
+### 🌐 WebUI（主推）
 
-项目提供了基于PyQt5的现代化图形用户界面，让您无需使用命令行即可轻松处理视频：
+WebUI 基于 FastAPI 提供浏览器界面，适合本地/服务器使用。更详细说明见 [vfd/webui/README.md](vfd/webui/README.md)。
+
+**安装依赖：**
+```bash
+pip install -r requirements.txt -r requirements-webui.txt
+```
+
+**启动命令：**
+```bash
+python -m uvicorn vfd.webui.app:create_app --factory --host 127.0.0.1 --port 8000
+```
+
+启动后访问：`http://127.0.0.1:8000/`
+
+**ffmpeg 安装（仅在需要转码时必须）：**
+- macOS（Homebrew）：`brew install ffmpeg`
+- Ubuntu/Debian：`sudo apt-get install ffmpeg`
+
+**参数说明（WebUI 表单字段）：**
+- `input_path`: 输入视频的本机路径
+- `detector`: `yunet` / `deepface` / `hybrid`
+- `deepface_backend`: deepface 后端（默认 `opencv`；仅 deepface/hybrid 生效）
+- `continuation_frames`: 检测失败时延续打码帧数（默认 5）
+- `apply_mosaic`: 是否打码（`true/false`）
+- `mosaic_size`: 马赛克粒度（默认 15）
+- `output_resolution`: `original` / `720p` / `1080p` / `WxH`
+- `video_bitrate`: 空/`6000k`/`6M`/纯数字（视为 Mbps，如 `6` -> `6M`）
+- `codec`: `auto`（默认）/ `h264`（转码到 H.264）
+
+**outputs 位置：**
+- 最终输出：`./outputs/<job_id>.mp4`
+- 中间文件：`./outputs/.tmp/<job_id>.tmp.mp4`
+
+### 🎨 旧 GUI（Deprecated）
+
+本项目曾提供桌面 GUI（PyQt5/Tkinter）。该方案已标记为 Deprecated，后续版本可能移除；请优先使用 WebUI。
 
 ```bash
 python gui_mosaic_pyqt.py
 ```
-
-**功能特性：**
-- 🎨 现代化界面：基于PyQt5的美观界面
-- 🔄 多检测器支持：hybrid、yunet、retinaface等
-- 👤 侧脸检测：专门的侧脸检测器选择
-- 🎭 输出模式：支持马赛克、模糊、黑框等多种效果
-- ⚡ 延续帧数：智能的人脸跟踪优化
-- 📋 实时日志：详细的处理过程显示
 
 ### 🚀 一键打码（推荐）
 

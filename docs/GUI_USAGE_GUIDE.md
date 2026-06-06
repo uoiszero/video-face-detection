@@ -1,5 +1,8 @@
 # 视频人脸检测 GUI 使用指南
 
+> Deprecated：本指南描述的旧桌面 GUI（Tkinter/PyQt）已不再主推，后续版本可能移除。  
+> 推荐使用 WebUI：请参考 [vfd/webui/README.md](../vfd/webui/README.md)。
+
 ## 概述
 
 本项目现在提供了一个图形用户界面（GUI），让用户可以通过鼠标点击的方式选择文件和设置参数，无需使用命令行。
