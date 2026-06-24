@@ -15,6 +15,7 @@
 
 ### 技术分析
 - `deepface_integration_analysis.md` - DeepFace集成技术分析
+- `CLI_USAGE.md` - CLI 使用手册（main.py / quick_mosaic.py）
 
 ## 文档说明
 
